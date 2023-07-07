@@ -38,3 +38,48 @@ for interface in $interfaces; do
 done
 
 printf "\n\n"
+
+
+#Reading System info for second case
+os_type=$(uname -s)
+cpu_Capacity=$(grep '^cpu MHz' /proc/cpuinfo | awk '{print $4}' | sort -rn | head -n 1)
+memory_Capacity=$(free -h | awk '/^Mem:/ {print $2}')
+disk_Capacity=$(df -h --total | awk '/^total/ {print $2}')
+
+
+calculate_average() {
+
+  sum=0
+  count=0
+  for value in "$@"; do
+    sum=$(bc <<< "$sum + $value")
+    count=$((count + 1))
+  done
+  average=$(bc <<< "scale=2; $sum / $count")
+  echo "$average"
+
+}
+
+avg_Cpu=$(calculate_average "${cpuUsage[@]}")  
+avg_Memory=$(calculate_average "${memUsage[@]}")
+avg_Disk=$(calculate_average "${diskUsage[@]}")
+
+
+
+#Display the summary report
+printf "\t\t\tSUMMARY REPORT"
+printf "\n\t\t     =========================\n\n"
+printf "\tOS TYPE                      :  %s \n" "$os_type"
+printf "\tCPU CAPACITY                 :  %sMHz\n" "$cpu_Capacity"
+printf "\tMEMORY CAPACITY              :  %s\n" "$memory_Capacity"
+printf "\tDISK CAPACITY                :  %s\n" "$disk_Capacity"
+printf "\tAVG CPU USAGE                :  %s\n" "$avg_Cpu"
+printf "\tAVG MEMORY USAGE             :  %s\n" "$avg_Memory"
+printf "\tAVG DISK USAGE               :  %s\n" "$avg_Disk"
+printf "\n\n"
+
+
+
+
+
+
