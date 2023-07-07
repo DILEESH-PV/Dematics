@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+#Reading System info for first case
+cpuUsage=$(top -bn1 | awk '/Cpu/ { print $4}')
+memUsage=$(free -m | awk '/Mem/ {print $3}')
+total_memory=$(free -m | awk 'NR==2 {print $2}')
+memUsage_Per=$(awk "BEGIN {printf \"%.2f\", ${memUsage}/${total_memory} * 100}")
+diskUsage_Per=$(df -h | awk '/\/$/ {print $5}')
+diskUsage=$(df -h | awk '/\/$/ { print $3}')
+load_avg=$(uptime | awk -F 'load average:' '{print $2}' | awk -F ',' '{print $1}')
+
+
+# Display the Details for first case
+printf "\n"
+echo $(date +"%D")
+printf ""
+printf "\t\t\tSYSTEM INFORMATION"
+printf "\n\t\t     =========================\n\n"
+printf "\tCPU USAGE                    :  %s%%\n" "$cpuUsage"
+printf "\tMEMORY USAGE                 :  %smb\n" "$memUsage"
+printf "\tMEMORY USAGE IN PERCENTAGE   :  %s%%\n" "$memUsage_Per"
+printf "\tDISK USAGE                   :  %s\n" "$diskUsage"
+printf "\tDISK USAGE IN PERCENTAGE     :  %s\n" "$diskUsage_Per"
+printf "\tLOAD_AVG                     : %s \n" "$load_avg"
+printf "\n"
+
+
+
+interfaces=$(ls /sys/class/net)
+# Loop through the network interfaces and get the incoming and outgoing data rates
+for interface in $interfaces; do
+  incoming=$(cat /sys/class/net/$interface/statistics/rx_bytes)
+  outgoing=$(cat /sys/class/net/$interface/statistics/tx_bytes)
+  printf "\tINTERFACE \t\t     :\t%s\n" "$interface"
+  printf "\tINCOMING \t\t     :\t%s kbps\n" "$incoming"
+  printf "\tOUTGOING  \t\t     :\t%s kbps\n" "$outgoing"
+  printf "\n"
+done
+
+printf "\n\n"
